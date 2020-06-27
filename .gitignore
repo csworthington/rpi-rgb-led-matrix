@@ -2,3 +2,5 @@
 *.a
 *~
 *.so
+examples-api-use/input-example
+examples-api-use/window-canvas/window-canvas
