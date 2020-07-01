@@ -406,6 +406,31 @@ private:
   internal::Framebuffer *const frame_;
 };
 
+// WindowCanvas class
+// Create a canvas within a canvas with specified width, height and offsets.
+class WindowCanvas : public Canvas {
+public:
+  WindowCanvas(rgb_matrix::Canvas *delegatee,
+               int width, int height,
+               int offset_x, int offset_y);
+
+  virtual int width() const;
+  virtual int height() const;
+  virtual int offset_x() const;
+  virtual int offset_y() const;
+  virtual void SetPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b);
+  virtual void Clear();
+  virtual void Fill(uint8_t r, uint8_t g, uint8_t b);
+  virtual void FillWindow(uint8_t r, uint8_t g, uint8_t b);
+
+private:
+  rgb_matrix::Canvas *const delegatee_;
+  const int width_;
+  const int height_;
+  const int offset_x_;
+  const int offset_y_;
+};
+
 // Runtime options to simplify doing common things for many programs such as
 // dropping privileges and becoming a daemon.
 struct RuntimeOptions {

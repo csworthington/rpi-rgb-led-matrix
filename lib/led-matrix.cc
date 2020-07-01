@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+#include <iostream>
+
 #include "gpio.h"
 #include "thread.h"
 #include "framebuffer-internal.h"
@@ -634,4 +636,71 @@ bool FrameCanvas::Deserialize(const char *data, size_t len) {
 void FrameCanvas::CopyFrom(const FrameCanvas &other) {
   frame_->CopyFrom(other.frame_);
 }
+
+
+// WindowCanvas implementation
+WindowCanvas::WindowCanvas(Canvas *delegatee,
+               int width, int height,
+               int offset_x, int offset_y)
+    : delegatee_(delegatee), width_(width), height_(height),
+      offset_x_(offset_x), offset_y_(offset_y) {}
+
+int WindowCanvas::width() const { return width_; }
+
+int WindowCanvas::height() const { return height_; }
+
+int WindowCanvas::offset_x() const { return offset_x_; }
+
+int WindowCanvas::offset_y() const { return offset_y_; }
+
+void WindowCanvas::SetPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+  if (x < 0 || x > width_ || y < 0 || y > height_) return;  // do clipping
+  delegatee_->SetPixel(x + offset_x_, y + offset_y_, r, g, b);
+}
+
+void WindowCanvas::Clear() { delegatee_->Clear(); }
+
+// TODO: consider changing this function to only fill the window canvas
+void WindowCanvas::Fill(uint8_t r, uint8_t g, uint8_t b) {
+    delegatee_->Fill(r, g, b);
+}
+
+// Use this to fill just the window instead of the entire canvas
+void WindowCanvas::FillWindow(uint8_t r, uint8_t g, uint8_t b){
+  for (int i = 0; i < this->width(); ++i) {
+    for (int j = 0; j < this->height(); ++j) {
+      this->SetPixel(i, j, r, g, b);
+    }
+  }
+}
+
+// class WindowCanvas : public rgb_matrix::Canvas {
+// public:
+//   WindowCanvas(rgb_matrix::Canvas *delegatee,
+//                int width, int height,
+//                int offset_x, int offset_y)
+//     : delegatee_(delegatee), width_(width), height_(height),
+//       offset_x_(offset_x), offset_y_(offset_y) {}
+
+//   virtual int width() const { return width_; }
+//   virtual int height() const { return height_; }
+//   virtual void SetPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+//     if (x < 0 || x > width_ || y < 0 || y > height_) return;  // do clipping
+//     delegatee_->SetPixel(x + offset_x_, y + offset_y_, r, g, b);
+//   }
+//   virtual void Clear() { delegatee_->Clear(); }
+//   virtual void Fill(uint8_t r, uint8_t g, uint8_t b) {
+//     delegatee_->Fill(r, g, b);
+//   }
+
+// private:
+//   rgb_matrix::Canvas *const delegatee_;
+//   const int width_;
+//   const int height_;
+//   const int offset_x_;
+//   const int offset_y_;
+// };
+
+
+
 }  // end namespace rgb_matrix
