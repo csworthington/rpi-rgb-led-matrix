@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from panelbase import PanelBase
+from rgbmatrix import RGBMatrix, WindowCanvas
 import time
 
 class SimpleSquare(PanelBase):
