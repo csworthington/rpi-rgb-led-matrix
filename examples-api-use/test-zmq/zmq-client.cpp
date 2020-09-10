@@ -6,10 +6,7 @@
 
 #include <iostream>
 #include <string>
-#include <typeinfo>
 #include <zmq.hpp>
-
-// *std::string bytes_to_str(){}
 
 int send_text_request(zmq::socket_t *socket, std::string text) {
   // Send the message
