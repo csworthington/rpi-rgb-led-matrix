@@ -6,13 +6,8 @@
 #include <zmq.hpp>
 #include <string>
 #include <iostream>
-#ifndef _WIN32
 #include <unistd.h>
-#else
-#include <windows.h>
 
-#define sleep(n)    Sleep(n)
-#endif
 
 int main () {
     //  Prepare our context and socket
