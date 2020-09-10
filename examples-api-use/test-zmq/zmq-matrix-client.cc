@@ -30,10 +30,31 @@ static void InterruptHandler(int signo) {
   interrupt_received = true;
 }
 
-int send_message_to_server (zmq::socket_t *socket, rgb_matrix::Canvas *canvas, int size) {
+bool is_same_data(const char* a1, size_t size1, const char* a2, size_t size2) {
+  if (size1 != size2) {
+    return false;
+  }
+  for (int i = 0; i < size1; ++i) {
+    if (a1[i] != a2[i]) {
+      cout << "a1[" << to_string(i) << "] = " << to_string(a1[i]) << ", a2[" << to_string(i) << "] = " << to_string(a2[i]) << endl;
+      return false;
+    }
+  }
+  return true;
+}
+
+int send_message_to_server (zmq::socket_t *socket, const char* serialized_canvas, size_t size) {
   // Create and send message
   zmq::message_t request(size);
-  memcpy(request.data(), canvas, size);
+  memcpy(request.data(), serialized_canvas, size);
+
+  // if (is_same_data(serialized_canvas, size, static_cast<char*>(request.data()), request.size())) {
+  //   cout << "data is same" << endl;
+  // } else {
+  //   cout << "data is not same" << endl;
+  //   return 0;
+  // }
+
   cout << "Sending byte array of size " << to_string(size) << "..." << endl;
   socket->send(request);
 
@@ -44,19 +65,6 @@ int send_message_to_server (zmq::socket_t *socket, rgb_matrix::Canvas *canvas, i
 
   return 0;
 }
-
-// const char ** serialize_canvas(rgb_matrix::FrameCanvas *frameCanvas) {
-// void serialize_canvas(rgb_matrix::FrameCanvas *frameCanvas) {
-//   cout << "attempting to serialize..." << endl;
-//   size_t len;
-//   vector<char> data;
-//   // const char *data;
-//   frameCanvas->Serialize(&data, &len);
-
-//   cout << "serialized length = " << to_string(len) << endl;
-
-//   // return &data;
-// }
 
 int main(int argc, char *argv[]) {
   // It is always good to set up a signal handler to cleanly exit when we
@@ -100,27 +108,19 @@ int main(int argc, char *argv[]) {
   size_t serialized_canvas_len; 
   frameCanvas->Serialize(&serialized_canvas, &serialized_canvas_len);
 
-
-
-  // cout << "Size of canvas: " << sizeof(canvas) << endl;
-  // cout << "Size of dereferenced canvas: " << sizeof(&canvas) << endl;
-  cout << "Size of canvas: " << sizeof(serialized_canvas) << endl;
-  cout << "Size of canvas in size_t: " << to_string(serialized_canvas_len) << endl;
-
-  // Fill canvas with blue and send message
-  // canvas->Fill(0,0,255);
-  // send_message_to_server(&socket, canvas, sizeof(canvas));
-  frameCanvas->Fill(0,0,255);
-
+  frameCanvas->Fill(0,255,255);
   frameCanvas->Serialize(&serialized_canvas, &serialized_canvas_len);
-  send_message_to_server(&socket, frameCanvas, sizeof(frameCanvas));
+  send_message_to_server(&socket, serialized_canvas, serialized_canvas_len);
+  // send_message_to_server(&socket, frameCanvas, sizeof(frameCanvas));
 
   cout << "sleeping..." << endl;
   sleep(2);
   // canvas->Clear();
   // send_message_to_server(&socket, canvas, sizeof(canvas));
   frameCanvas->Clear();
-  send_message_to_server(&socket, frameCanvas, sizeof(frameCanvas));
+  frameCanvas->Serialize(&serialized_canvas, &serialized_canvas_len);
+  // send_message_to_server(&socket, frameCanvas, sizeof(frameCanvas));
+  send_message_to_server(&socket, serialized_canvas, serialized_canvas_len);
 
   cout << "finished sending messages..." << endl;
   cout << "matrix = " << matrix << endl;

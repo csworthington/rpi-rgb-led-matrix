@@ -45,19 +45,6 @@ int send_message_to_server (zmq::socket_t *socket, rgb_matrix::Canvas *canvas, i
   return 0;
 }
 
-// const char ** serialize_canvas(rgb_matrix::FrameCanvas *frameCanvas) {
-// void serialize_canvas(rgb_matrix::FrameCanvas *frameCanvas) {
-//   cout << "attempting to serialize..." << endl;
-//   size_t len;
-//   vector<char> data;
-//   // const char *data;
-//   frameCanvas->Serialize(&data, &len);
-
-//   cout << "serialized length = " << to_string(len) << endl;
-
-//   // return &data;
-// }
-
 int main(int argc, char *argv[]) {
   // It is always good to set up a signal handler to cleanly exit when we
   // receive a CTRL-C for instance. The DrawOnCanvas() routine is looking
@@ -76,10 +63,12 @@ int main(int argc, char *argv[]) {
   // Prepare matrix
   RGBMatrix::Options defaults;
   defaults.hardware_mapping = "regular";  // or e.g. "adafruit-hat"
+  defaults.cols = 64;
   defaults.rows = 32;
   defaults.chain_length = 1;
   defaults.parallel = 1;
-  defaults.show_refresh_rate = false;
+  defaults.limit_refresh_rate_hz = 100;
+  defaults.show_refresh_rate = true;
   defaults.brightness = 30;
 
 
@@ -95,7 +84,11 @@ int main(int argc, char *argv[]) {
   // size_t serialized_canvas_len; 
   // frameCanvas->Serialize(&serialized_canvas, &serialized_canvas_len);
 
+  frameCanvas->Fill(255,0,0);
+  matrix->SwapOnVSync(frameCanvas);
+
   while (true) {
+    // cout << "starting loop..." << endl;
     zmq::message_t request;
 
     // Wait for request from client
@@ -105,9 +98,13 @@ int main(int argc, char *argv[]) {
     frameCanvas->Deserialize(static_cast<char*>(request.data()), request.size());
     matrix->SwapOnVSync(frameCanvas);
 
-    zmq::message_t reply (1);
-    memcpy(reply.data(), nullptr, 1);
+    // cout << "swapped successfully" << endl;
+
+    zmq::message_t reply;
+    // cout << "created reply" << endl;
+    // memcpy(reply.data(), "success", 7);
     socket.send(reply);
+    // cout << "sent reply" << endl;
   }
 
   delete matrix;
