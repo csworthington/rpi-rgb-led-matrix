@@ -1,7 +1,7 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
 CXXFLAGS=$(CFLAGS)
-OBJECTS=test-zmq.o zmq-client.o zmq-server.o
-BINARIES=test-zmq zmq-client zmq-server
+OBJECTS=zmq-matrix-client.o zmq-matrix-server.o
+BINARIES=zmq-matrix-client zmq-matrix-server
 
 # Where our library resides. You mostly only need to change the
 # RGB_LIB_DISTRIBUTION, this is where the library is checked out.
@@ -17,12 +17,11 @@ all : $(BINARIES)
 $(RGB_LIBRARY): FORCE
 	$(MAKE) -C $(RGB_LIBDIR)
 
-# demo : demo-main.o $(RGB_LIBRARY)
-# 	$(CXX) $< -o $@ $(LDFLAGS)
-
-test-zmq : test-zmq.o
-zmq-client : zmq-client.o
-zmq-server : zmq-server.o
+zmq-matrix-client : zmq-matrix-client.o
+zmq-matrix-server : zmq-matrix-server.o
+# test-zmq : test-zmq.o
+# zmq-client : zmq-client.o
+# zmq-server : zmq-server.o
 # minimal-example : minimal-example.o
 # input-example : input-example.o
 # text-example: text-example.o
