@@ -42,30 +42,25 @@ int main(int argc, char *argv[]) {
   if (canvas == NULL)
     return 1;
 
-  // // Prepare context and socket
-  // void *context = zmq_ctx_new ();
-  // zmq::context_t context (1);
-  // zmq::socket_t socket(context, ZMQ_REQ);
+  // Prepare context and socket
+  zmq::context_t context (1);
+  zmq::socket_t socket (context, ZMQ_REQ);
   
-  // std::cout << "Connecting to test server..." << endl;
-  // socket.connect("tcp://localhost:5555")
+  std::cout << "Connecting to test server..." << std::endl;
+  socket.connect("tcp://localhost:5555");
 
-  // // do 10 requests, waiting each time for a response
-  // for (int request_nbr = 0; request_nbr != 10; request_nbr++) {
-  //   zmq::message_t request (5);
-  //   memcpy(request.data(), "Hello", 5);
-  //   std::cout << "Sending Hello " << request_nbr << "..." << endl;
-  //   socket.send(request);
+  // do 10 requests, waiting each time for a response
+  for (int request_nbr = 0; request_nbr != 10; request_nbr++) {
+    zmq::message_t request (5);
+    memcpy(request.data(), "Hello", 5);
+    std::cout << "Sending Hello " << request_nbr << "..." << std::endl;
+    socket.send(request);
 
-  //   // Get the reply
-  //   zmq::message_t reply;
-  //   socket.recv(&reply);
-  //   cout << "Received World " << request_nbr << endl;
-  // }
-  // const std::string_view m = "Hello, world";
-  // sock.send(zmq::buffer(m), zmq::send_flags::dontwait);
-
-
+    // Get the reply
+    zmq::message_t reply;
+    socket.recv(&reply);
+    std::cout << "Received World " << request_nbr << std::endl;
+  }
 
   canvas->Fill(0,0,255);
   cout << "sleeping..." << endl;

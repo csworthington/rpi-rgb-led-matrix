@@ -6,7 +6,30 @@
 
 #include <iostream>
 #include <string>
+#include <typeinfo>
 #include <zmq.hpp>
+
+// *std::string bytes_to_str(){}
+
+int send_text_request(zmq::socket_t *socket, std::string text) {
+  // Send the message
+  std::cout << "Sending message [ " << text << " ]...";
+  int text_length = text.length();
+  zmq::message_t request (text_length);
+  memcpy(request.data(), &text, text_length);
+  socket->send(request);
+
+  // Get the reply
+  zmq::message_t reply;
+  socket->recv(&reply);
+  unsigned char* uc;
+  uc = (unsigned char*)reply.data();
+  std::string reply_text(reinterpret_cast<char const*>(uc), reply.size());
+  std::cout << "Received message of size : " << reply.size() << std::endl;
+  std::cout << "Message : " << reply_text << std::endl; 
+
+  return 0;
+}
 
 int main () {
   // Prepare context and socket
@@ -18,15 +41,9 @@ int main () {
 
   // do 10 requests, waiting each time for a response
   for (int request_nbr = 0; request_nbr != 10; request_nbr++) {
-    zmq::message_t request (5);
-    memcpy(request.data(), "Hello", 5);
-    std::cout << "Sending Hello " << request_nbr << "..." << std::endl;
-    socket.send(request);
-
-    // Get the reply
-    zmq::message_t reply;
-    socket.recv(&reply);
-    std::cout << "Received World " << request_nbr << std::endl;
+    std::string text = "msg ";
+    text += std::to_string(request_nbr); 
+    send_text_request(&socket, text);
   }
 
   return 0;
