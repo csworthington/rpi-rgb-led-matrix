@@ -15,6 +15,8 @@ int main () {
     zmq::socket_t socket (context, ZMQ_REP);
     socket.bind ("tcp://*:5555");
 
+    std::cout << "Server created at \"tcp://localhost:5555\"" << std::endl;
+
     while (true) {
         zmq::message_t request;
 
