@@ -72,6 +72,11 @@ cdef class FrameCanvas(Canvas):
     def SetPixel(self, int x, int y, uint8_t red, uint8_t green, uint8_t blue):
         (<cppinc.FrameCanvas*>self.__getCanvas()).SetPixel(x, y, red, green, blue)
 
+    def Serialize(self):
+        cdef char* serialized_canvas
+        cdef size_t serialized_canvas_size
+        (<cppinc.FrameCanvas*>self.__getCanvas()).Serialize(&serialized_canvas, &serialized_canvas_size)
+        return serialized_canvas
 
     property width:
         def __get__(self): return (<cppinc.FrameCanvas*>self.__getCanvas()).width()

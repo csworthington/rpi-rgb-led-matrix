@@ -29,6 +29,8 @@ cdef extern from "led-matrix.h" namespace "rgb_matrix":
         uint8_t pwmbits()
         void SetBrightness(uint8_t)
         uint8_t brightness()
+        void Serialize(const char **, size_t *)
+        bool Deserialize(const char *, size_t)
 
     struct RuntimeOptions:
       RuntimeOptions() except +
