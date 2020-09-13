@@ -141,7 +141,6 @@ cdef class FrameCanvas(Canvas):
         # call the function
         (<cppinc.FrameCanvas*>self.__getCanvas()).Serialize(&serialized_canvas, &serialized_canvas_size)
 
-
         array_wrapper = ArrayWrapper()
         array_wrapper.set_data(size=serialized_canvas_size, data_ptr=<void*>serialized_canvas)
         ndarray = np.array(array_wrapper, copy=False)
@@ -152,7 +151,6 @@ cdef class FrameCanvas(Canvas):
         # increment the reference count, as the above assignment was done in C,
         # and Python does not know that there is an additional reference
         Py_INCREF(array_wrapper)
-
 
         return ndarray
         
