@@ -1,10 +1,11 @@
 #!/usr/bin/python
+import numpy
 from distutils.core import setup, Extension
 
 core_ext = Extension(
     name                = 'core',
     sources             = ['rgbmatrix/core.cpp'],
-    include_dirs        = ['../../include'],
+    include_dirs        = ['../../include', numpy.get_include()],
     library_dirs        = ['../../lib'],
     libraries           = ['rgbmatrix'],
     extra_compile_args  = ["-O3", "-Wall"],

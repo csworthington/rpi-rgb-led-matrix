@@ -1,9 +1,69 @@
 # distutils: language = c++
 
+import numpy as np
+cimport numpy as np
+
+from libc.stdlib cimport free
+from cpython cimport PyObject, Py_INCREF
+
 from libcpp cimport bool
 from libc.stdint cimport uint8_t, uint32_t, uintptr_t
 from PIL import Image
 import cython
+import io
+
+# Numpy must be initialized. When using numpy from C or Cython you must
+# _always_ do that, or you will have segfaults
+np.import_array()
+
+# Build an array wrapper class to deallocate array when the python object is deleted
+cdef class ArrayWrapper:
+    cdef void* data_ptr
+    cdef int size
+    
+    cdef set_data(self, int size, void* data_ptr):
+        ''' Set the data of the array
+        
+        This cannot be done in the constructor as it must receive c level 
+        arguments.
+        
+        Parameters:
+        ------------
+        size: int
+            Length of the array
+        data_ptr: void*
+            Pointer to the data
+        '''
+        self.data_ptr = data_ptr
+        self.size = size
+    
+    def __array__(self):
+        '''Use the __array__ method that is called when numpy
+        tries to get an array from the object'''
+        cdef np.npy_intp shape[1]
+        shape[0] = <np.npy_intp> self.size
+        # shape[0] = <np.npy_ubyte> self.size
+        
+        # Create a 1D array of length 'size'
+        # ndarray = np.PyArray_SimpleNewFromData(
+        #     nd=1, 
+        #     dims=shape, 
+        #     typenum=np.NPY_INT, 
+        #     data=self.data_ptr)
+        ndarray = np.PyArray_SimpleNewFromData(
+            nd=1, 
+            dims=shape, 
+            typenum=np.NPY_UBYTE, 
+            data=self.data_ptr)
+        
+        return ndarray
+    
+
+    def __dealloc__(self):
+        '''Frees the array. This is called by Python when all the
+        references to the object are gone'''
+        free(<void*>self.data_ptr)
+
 
 cdef class Canvas:
     cdef cppinc.Canvas* __getCanvas(self) except +:
@@ -73,10 +133,29 @@ cdef class FrameCanvas(Canvas):
         (<cppinc.FrameCanvas*>self.__getCanvas()).SetPixel(x, y, red, green, blue)
 
     def Serialize(self):
-        cdef char* serialized_canvas
+        '''Python binding of the serialize function in canvas'''
+        cdef const char* serialized_canvas
         cdef size_t serialized_canvas_size
+        cdef np.ndarray ndarray
+
+        # call the function
         (<cppinc.FrameCanvas*>self.__getCanvas()).Serialize(&serialized_canvas, &serialized_canvas_size)
-        return serialized_canvas
+
+
+        array_wrapper = ArrayWrapper()
+        array_wrapper.set_data(size=serialized_canvas_size, data_ptr=<void*>serialized_canvas)
+        ndarray = np.array(array_wrapper, copy=False)
+
+        # assign our object to the base of the ndarray
+        ndarray.base = <PyObject*>array_wrapper
+
+        # increment the reference count, as the above assignment was done in C,
+        # and Python does not know that there is an additional reference
+        Py_INCREF(array_wrapper)
+
+
+        return ndarray
+        
 
     property width:
         def __get__(self): return (<cppinc.FrameCanvas*>self.__getCanvas()).width()
