@@ -67,8 +67,8 @@ int main(int argc, char *argv[]) {
   defaults.rows = 32;
   defaults.chain_length = 1;
   defaults.parallel = 1;
-  defaults.limit_refresh_rate_hz = 100;
-  defaults.show_refresh_rate = true;
+  defaults.limit_refresh_rate_hz = 60;
+  defaults.show_refresh_rate = false;
   defaults.brightness = 30;
 
 
@@ -85,6 +85,7 @@ int main(int argc, char *argv[]) {
   // frameCanvas->Serialize(&serialized_canvas, &serialized_canvas_len);
 
   frameCanvas->Fill(255,0,0);
+  // frameCanvas->SetPixel(0, 0, 0, 0, 255);
   matrix->SwapOnVSync(frameCanvas);
 
   while (true) {
