@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
   defaults.rows = 32;
   defaults.chain_length = 1;
   defaults.parallel = 1;
-  defaults.limit_refresh_rate_hz = 60;
+  defaults.limit_refresh_rate_hz = 100;
   defaults.show_refresh_rate = false;
   defaults.brightness = 30;
 
@@ -99,13 +99,13 @@ int main(int argc, char *argv[]) {
     frameCanvas->Deserialize(static_cast<char*>(request.data()), request.size());
     matrix->SwapOnVSync(frameCanvas);
 
-    // cout << "swapped successfully" << endl;
+    cout << "swapped successfully" << endl;
 
     zmq::message_t reply;
     // cout << "created reply" << endl;
     // memcpy(reply.data(), "success", 7);
     socket.send(reply);
-    // cout << "sent reply" << endl;
+    cout << "sent reply" << endl;
   }
 
   delete matrix;
